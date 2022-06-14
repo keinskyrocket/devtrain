@@ -1,3 +1,44 @@
+puts "******************************"
+puts "Welcome to HANGMAN!"
+puts "Guess a secret word"
+puts "You have 9 times to guess..."
+puts "******************************"
+
+MAX_LIVES = 9
+WORDS = ["dog", "cat", "fox"]
+
+word = WORDS.sample
+hash_of_word = word.split("").map { |letter| {"letter": letter, "validation": false} }
+game_won = false
+history = []
+
+while history.length < MAX_LIVES && !game_won do
+  display_current = hash_of_word.map { |el| !el[:validation] ? "_" : el[:letter] }.join
+
+  puts "\nSecret word: #{display_current}"
+  puts "History: #{history}\n\n"
+  puts "---------- Pick a letter!! ----------"
+  guess = gets.chomp
+
+  if history.include?(guess) || hash_of_word.find { |el| el[:letter] === guess && el[:validation] }
+    puts "\n>> You have already picked '#{guess}'."
+  elsif hash_of_word.find { |el| el[:letter] === guess && !el[:validation] }
+    hash_of_word.find { |el| el[:letter] === guess}[:validation] = true
+    puts "\n>> Yes :D"
+  else
+    history << guess
+    puts "\n>> Not that one!"
+  end
+
+  game_won = hash_of_word.map { |el| el[:validation] }.all?(true)
+  puts ">> Remaining lives: #{MAX_LIVES - history.length}"
+end
+
+puts "\n\n******************************"
+puts game_won ? "Win" : "Lose. The answer is '#{word}'"
+puts "******************************"
+
+
 # Initialise setting
   # Set player's remaining lives to be 9
   # Pick a secret word out of many
