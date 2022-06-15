@@ -7,35 +7,36 @@ puts "******************************"
 MAX_LIVES = 9
 WORDS = ["dog", "cat", "fox"]
 
-word = WORDS.sample
-hash_of_word = word.split("").map { |letter| {"letter": letter, "validation": false} }
+# word = WORDS.sample
+word = "turtle"
+hash_of_word = word.chars().map { |letter| {:letter => letter, :validation => false} }
 game_won = false
-history = []
+wrong_letters_answered = []
 
-while history.length < MAX_LIVES && !game_won do
-  display_current = hash_of_word.map { |el| !el[:validation] ? "_" : el[:letter] }.join
+while wrong_letters_answered.length < MAX_LIVES && !game_won do
+  display_current = hash_of_word.map { |el| !el[:validation] ? 9609.chr("UTF-8") : el[:letter] }.join
 
   puts "\nSecret word: #{display_current}"
-  puts "History: #{history}\n\n"
+  puts "Wrong letters answered: #{wrong_letters_answered}\n\n"
   puts "---------- Pick a letter!! ----------"
   guess = gets.chomp
 
-  if history.include?(guess) || hash_of_word.find { |el| el[:letter] === guess && el[:validation] }
+  if wrong_letters_answered.include?(guess) || hash_of_word.find { |el| el[:letter] === guess && el[:validation] }
     puts "\n>> You have already picked '#{guess}'."
   elsif hash_of_word.find { |el| el[:letter] === guess && !el[:validation] }
-    hash_of_word.find { |el| el[:letter] === guess}[:validation] = true
+    hash_of_word.find_all { |el| el[:validation] = true if el[:letter] === guess && !el[:validation] }
     puts "\n>> Yes :D"
   else
-    history << guess
+    wrong_letters_answered << guess
     puts "\n>> Not that one!"
   end
 
-  game_won = hash_of_word.map { |el| el[:validation] }.all?(true)
-  puts ">> Remaining lives: #{MAX_LIVES - history.length}"
+  game_won = hash_of_word.all? { |el| el[:validation] }
+  puts ">> Remaining lives: #{MAX_LIVES - wrong_letters_answered.length}"
 end
 
 puts "\n\n******************************"
-puts game_won ? "Win" : "Lose. The answer is '#{word}'"
+puts game_won ? "Win. Yes, it is '#{word}'" : "Lose. The answer is '#{word}'"
 puts "******************************"
 
 
