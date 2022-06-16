@@ -6,15 +6,16 @@ puts "******************************"
 
 MAX_LIVES = 9
 WORDS = ["dog", "cat", "fox"]
+BLOCK_SYMBOL = 9609.chr("UTF-8")
 
 # word = WORDS.sample
 word = "turtle"
-hash_of_word = word.chars().map { |letter| {:letter => letter, :validation => false} }
+hash_of_word = word.chars().map { |letter| {letter: letter, validation: false} }
 game_won = false
 wrong_letters_answered = []
 
 while wrong_letters_answered.length < MAX_LIVES && !game_won do
-  display_current = hash_of_word.map { |el| !el[:validation] ? 9609.chr("UTF-8") : el[:letter] }.join
+  display_current = hash_of_word.map { |el| !el[:validation] ? BLOCK_SYMBOL : el[:letter] }.join
 
   puts "\nSecret word: #{display_current}"
   puts "Wrong letters answered: #{wrong_letters_answered}\n\n"
@@ -24,7 +25,7 @@ while wrong_letters_answered.length < MAX_LIVES && !game_won do
   if wrong_letters_answered.include?(guess) || hash_of_word.any? { |el| el[:letter] === guess && el[:validation] }
     puts "\n>> You have already picked '#{guess}'."
   elsif hash_of_word.any? { |el| el[:letter] === guess && !el[:validation] }
-    hash_of_word.select { |el| el[:validation] = true if el[:letter] === guess && !el[:validation] }
+    hash_of_word.each { |el| el[:validation] = true if el[:letter] === guess }
     puts "\n>> Yes :D"
   else
     wrong_letters_answered << guess
