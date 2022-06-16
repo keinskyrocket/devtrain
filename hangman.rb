@@ -21,10 +21,10 @@ while wrong_letters_answered.length < MAX_LIVES && !game_won do
   puts "---------- Pick a letter!! ----------"
   guess = gets.chomp
 
-  if wrong_letters_answered.include?(guess) || hash_of_word.find { |el| el[:letter] === guess && el[:validation] }
+  if wrong_letters_answered.include?(guess) || hash_of_word.any? { |el| el[:letter] === guess && el[:validation] }
     puts "\n>> You have already picked '#{guess}'."
-  elsif hash_of_word.find { |el| el[:letter] === guess && !el[:validation] }
-    hash_of_word.find_all { |el| el[:validation] = true if el[:letter] === guess && !el[:validation] }
+  elsif hash_of_word.any? { |el| el[:letter] === guess && !el[:validation] }
+    hash_of_word.select { |el| el[:validation] = true if el[:letter] === guess && !el[:validation] }
     puts "\n>> Yes :D"
   else
     wrong_letters_answered << guess
