@@ -24,7 +24,12 @@ def hangman(word = nil, console_input = $stdin, console_output = $stdout)
     console_output.puts "---------- Pick a letter!! ----------"
     guess = console_input.gets.chomp
 
-    if wrong_letters_answered.include?(guess) || hash_of_word.any? { |el| el[:letter] === guess && el[:validation] }
+    # puts "#{guess.size}"
+    if guess.size != 1
+      console_output.puts "No more than one letter is allowed."
+    elsif !guess.match?(/[a-z]/)
+      console_output.puts "Non-letter guesses are not allowed."
+    elsif wrong_letters_answered.include?(guess) || hash_of_word.any? { |el| el[:letter] === guess && el[:validation] }
       console_output.puts "\n>> You have already picked '#{guess}'."
     elsif hash_of_word.any? { |el| el[:letter] === guess && !el[:validation] }
       hash_of_word.each { |el| el[:validation] = true if el[:letter] === guess }
