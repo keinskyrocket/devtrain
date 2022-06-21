@@ -24,7 +24,6 @@ def hangman(word = nil, console_input = $stdin, console_output = $stdout)
     console_output.puts "---------- Pick a letter!! ----------"
     guess = console_input.gets.chomp
 
-    # puts "#{guess.size}"
     if guess.size != 1
       console_output.puts "No more than one letter is allowed."
     elsif !guess.match?(/[a-z]/)
