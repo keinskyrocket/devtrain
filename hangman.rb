@@ -5,7 +5,7 @@ WORDS = File.open('words.txt').map { |word| word.strip }
 BLOCK_SYMBOL = 9609.chr("UTF-8")
 
 def hangman(word = nil, console_input = $stdin, console_output = $stdout)
-  console_output.puts "******************************"
+  console_output.puts "\n******************************"
   console_output.puts "Welcome to HANGMAN!"
   console_output.puts "Guess a secret word"
   console_output.puts "You have 9 times to guess..."
@@ -45,7 +45,6 @@ def hangman(word = nil, console_input = $stdin, console_output = $stdout)
   console_output.puts "\n\n******************************"
   console_output.puts game_won ? "Win. Yes, it is '#{word}'" : "Lose. The answer is '#{word}'"
   console_output.puts "******************************"
-
 end
 
 # Initialise setting
@@ -87,3 +86,8 @@ end
 # Otherwise
   # Tell them they lost
   # Reveal the answer
+
+# Show replay option at the end of the game
+# Restart the game
+  # Reset wrong_letters_answered
+  # Pick a new secret word
