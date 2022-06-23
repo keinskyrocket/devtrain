@@ -1,6 +1,6 @@
 require 'pry-byebug'
 
-def game_runner(console_input = $stdin, console_output = $stdout)
+def player_wants_to_stop_playing(console_input = $stdin, console_output = $stdout)
   console_output.puts "==> Do you want to play it again? <y/n>"
 
   loop do
