@@ -1,10 +1,10 @@
 require_relative "./hangman"
-require_relative "./game_runner"
+require_relative "./player_wants_to_stop_playing"
 
 loop do
   hangman
 
-  if game_runner
+  if player_wants_to_stop_playing
     break
   end
 end
