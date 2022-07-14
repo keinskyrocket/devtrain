@@ -1,50 +1,48 @@
 require 'pry-byebug'
+require_relative './input'
+require_relative './output'
 
-MAX_LIVES = 9
-WORDS = File.open('words.txt').map { |word| word.strip }
-BLOCK_SYMBOL = 9609.chr("UTF-8")
+class Hangman
+  MAX_LIVES = 9
+  WORDS = File.open('words.txt').map { |word| word.strip }
 
-def hangman(word = nil, console_input = $stdin, console_output = $stdout)
-  console_output.puts "\n******************************"
-  console_output.puts "Welcome to HANGMAN!"
-  console_output.puts "Guess a secret word"
-  console_output.puts "You have 9 times to guess..."
-  console_output.puts "******************************"
+  def play(word = nil, console_input = $stdin, console_output = $stdout)
+    word = WORDS.sample unless word
+    hash_of_word = word.chars().map { |letter| {letter: letter, validation: false} }
+    game_won = false
+    wrong_letters_answered = []
 
-  word = WORDS.sample unless word
-  hash_of_word = word.chars().map { |letter| {letter: letter, validation: false} }
-  game_won = false
-  wrong_letters_answered = []
+    output = Output.new(console_output)
+    input = Input.new(console_input, console_output)
 
-  while wrong_letters_answered.length < MAX_LIVES && !game_won do
-    display_current = hash_of_word.map { |el| !el[:validation] ? BLOCK_SYMBOL : el[:letter] }.join
+    output.start
 
-    console_output.puts "\nSecret word: #{display_current}"
-    console_output.puts "Wrong letters answered: #{wrong_letters_answered}\n\n"
-    console_output.puts "---------- Pick a letter!! ----------"
-    guess = console_input.gets.chomp
+    while wrong_letters_answered.length < MAX_LIVES && !game_won do
+      
+      display_current = hash_of_word.map { |el| !el[:validation] ? nil : el[:letter] }
+      output.display_progress(display_current, wrong_letters_answered)
+      guess = input.get_guess
 
-    if guess.size != 1
-      console_output.puts "No more than one letter is allowed."
-    elsif !guess.match?(/[a-z]/)
-      console_output.puts "Non-letter guesses are not allowed."
-    elsif wrong_letters_answered.include?(guess) || hash_of_word.any? { |el| el[:letter] === guess && el[:validation] }
-      console_output.puts "\n>> You have already picked '#{guess}'."
-    elsif hash_of_word.any? { |el| el[:letter] === guess && !el[:validation] }
-      hash_of_word.each { |el| el[:validation] = true if el[:letter] === guess }
-      console_output.puts "\n>> Yes :D"
-    else
-      wrong_letters_answered << guess
-      console_output.puts "\n>> Not that one!"
+      if wrong_letters_answered.include?(guess) || hash_of_word.any? { |el| el[:letter] === guess && el[:validation] }
+        output.has_duplicates(guess)
+      else
+        guess_is_correct = hash_of_word.any? { |el| el[:letter] === guess && !el[:validation] }
+
+        if guess_is_correct
+          hash_of_word.each { |el| el[:validation] = true if el[:letter] === guess }
+        else
+          wrong_letters_answered << guess
+        end
+
+        output.display_guess_result(guess_is_correct)
+      end
+
+      game_won = hash_of_word.all? { |el| el[:validation] }
+      output.display_remaining_lives(MAX_LIVES, wrong_letters_answered)
     end
 
-    game_won = hash_of_word.all? { |el| el[:validation] }
-    console_output.puts ">> Remaining lives: #{MAX_LIVES - wrong_letters_answered.length}"
+    output.end(word, game_won)
   end
-
-  console_output.puts "\n\n******************************"
-  console_output.puts game_won ? "Win. Yes, it is '#{word}'" : "Lose. The answer is '#{word}'"
-  console_output.puts "******************************"
 end
 
 # Initialise setting
