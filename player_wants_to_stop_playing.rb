@@ -1,24 +1,9 @@
 require 'pry-byebug'
 
 def player_wants_to_stop_playing(console_input = $stdin, console_output = $stdout)
-  console_output.puts "==> Do you want to play it again? <y/n>"
+  output = Output.new(console_output)
+  input = Input.new(console_input, console_output)
 
-  loop do
-    answer = console_input.gets.chomp
-
-    if !answer.match?(/(^(y|n))+$/) # The letter start and end with y or n (only accept single letter: y or n)
-      console_output.puts "Either 'y' or 'n' is allowed."
-    elsif answer == 'n'
-      console_output.puts "Bye"
-      return true
-    elsif answer == 'y'
-      console_output.puts "Play again"
-      break
-    end
-  end
+  output.ask_replay_game
+  input.get_answer
 end
-
-# Ask answer till getting the right string
-  # Show the error massage if typed other than 'n' and 'y'
-  # Exit the game if typed 'n'
-  # Restart the game if typed 'y'
