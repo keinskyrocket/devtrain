@@ -6,42 +6,57 @@ class Hangman
   MAX_LIVES = 9
   WORDS = File.open('words.txt').map { |word| word.strip }
 
-  def play(word = nil, console_input = $stdin, console_output = $stdout)
-    word = WORDS.sample unless word
-    hash_of_word = word.chars().map { |letter| {letter: letter, validation: false} }
-    game_won = false
-    wrong_letters_answered = []
+  def initialize(console_input = $stdin, console_output = $stdout, word = nil)
+    @output = Output.new(console_output)
+    @input = Input.new(console_input, console_output)
+    @word = word || WORDS.sample ## word ? word : WORDS.sample
+  end
 
-    output = Output.new(console_output)
-    input = Input.new(console_input, console_output)
+  def play
+    game_property = {
+      hash_of_word: @word.chars().map { |letter| {letter: letter, validation: false} },
+      game_won: false,
+      wrong_letters_answered: []
+    }
 
-    output.start
+    @output.start
 
-    while wrong_letters_answered.length < MAX_LIVES && !game_won do
-      
-      display_current = hash_of_word.map { |el| !el[:validation] ? nil : el[:letter] }
-      output.display_progress(display_current, wrong_letters_answered)
-      guess = input.get_guess
-
-      if wrong_letters_answered.include?(guess) || hash_of_word.any? { |el| el[:letter] === guess && el[:validation] }
-        output.has_duplicates(guess)
-      else
-        guess_is_correct = hash_of_word.any? { |el| el[:letter] === guess && !el[:validation] }
-
-        if guess_is_correct
-          hash_of_word.each { |el| el[:validation] = true if el[:letter] === guess }
-        else
-          wrong_letters_answered << guess
-        end
-
-        output.display_guess_result(guess_is_correct)
-      end
-
-      game_won = hash_of_word.all? { |el| el[:validation] }
-      output.display_remaining_lives(MAX_LIVES, wrong_letters_answered)
+    while game_property[:wrong_letters_answered].length < MAX_LIVES && !game_property[:game_won] do
+      game_property = take_turn(game_property)
     end
 
-    output.end(word, game_won)
+    @output.end(@word, game_property[:game_won])
+  end
+
+  def take_turn(game_property)
+    new_game_property = {
+      hash_of_word: game_property[:hash_of_word].dup,
+      game_won: game_property[:game_won].dup,
+      wrong_letters_answered: game_property[:wrong_letters_answered].dup
+    }
+
+    display_current = new_game_property[:hash_of_word].map { |el| !el[:validation] ? nil : el[:letter] }
+    @output.display_progress(display_current, new_game_property[:wrong_letters_answered])
+    guess = @input.get_guess
+
+    if new_game_property[:wrong_letters_answered].include?(guess) || new_game_property[:hash_of_word].any? { |el| el[:letter] === guess && el[:validation] }
+      @output.has_duplicates(guess)
+    else
+      guess_is_correct = new_game_property[:hash_of_word].any? { |el| el[:letter] === guess && !el[:validation] }
+
+      if guess_is_correct
+        new_game_property[:hash_of_word].each { |el| el[:validation] = true if el[:letter] === guess }
+      else
+        new_game_property[:wrong_letters_answered] << guess
+      end
+
+      @output.display_guess_result(guess_is_correct)
+    end
+
+    new_game_property[:game_won] = new_game_property[:hash_of_word].all? { |el| el[:validation] }
+    @output.display_remaining_lives(MAX_LIVES, new_game_property[:wrong_letters_answered])
+
+    new_game_property
   end
 end
 
