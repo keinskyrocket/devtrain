@@ -4,15 +4,13 @@ describe Output do
   describe "#start" do
     let(:output) { StringIO.new }
 
-    context 'When player start Hangman' do
-      it 'should display welcome message' do
-        Output.new(output).start
-        expect(output.string).to include "\n******************************"
-        expect(output.string).to include "Welcome to HANGMAN!"
-        expect(output.string).to include "Guess a secret word"
-        expect(output.string).to include "You have 9 times to guess..."
-        expect(output.string).to include "******************************"
-      end
+    it 'should display welcome message' do
+      Output.new(output).start
+      expect(output.string).to include "\n******************************"
+      expect(output.string).to include "Welcome to HANGMAN!"
+      expect(output.string).to include "Guess a secret word"
+      expect(output.string).to include "You have 9 times to guess..."
+      expect(output.string).to include "******************************"
     end
 
     it 'should display game progress' do
@@ -46,11 +44,6 @@ describe Output do
 
       Output.new(output).end('turtle', false)
       expect(output.string).to include "Lose. The answer is 'turtle'"
-    end
-
-    it 'should display a message to ask whether player want to replay the game' do
-      Output.new(output).ask_replay_game
-      expect(output.string).to include '==> Do you want to play it again? <y/n>'
     end
   end
 end

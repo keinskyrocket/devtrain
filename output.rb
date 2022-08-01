@@ -43,8 +43,4 @@ class Output
     @console_output.puts game_won ? "Win. Yes, it is '#{word}'" : "Lose. The answer is '#{word}'"
     @console_output.puts "******************************"
   end
-
-  def ask_replay_game
-    @console_output.puts "==> Do you want to play it again? <y/n>"
-  end
 end
