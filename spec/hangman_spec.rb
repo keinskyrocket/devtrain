@@ -17,21 +17,6 @@ describe Hangman do
       
       Hangman.new(input, output, 'hat').play
     end
-
-    # it 'should ask users to type a guess unless all lives are consumed or the secret word is revealed' do
-    #   
-    #   hangman = Hangman.new(build_input('plshat'.chars), output, 'hat')
-
-    #   game_property = {
-    #     hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
-    #     game_won: false,
-    #     wrong_letters_answered: ['p', 'l', 's']
-    #   }
-
-    #   # hangman.play
-    #   expect(game_property[:game_won]).to be false
-    #   expect(game_property[:wrong_letters_answered].length).not_to eq 9
-    # end
   end
 
   describe '#take_turn' do
@@ -88,7 +73,7 @@ describe Hangman do
           expect(new_game_property[:wrong_letters_answered].length).to eq 0
         end
 
-        it 'should return "true" to display a message' do
+        it 'should tell the user the guess is correct' do
           allow_any_instance_of(Input).to receive(:get_guess).and_return('h')
           expect_any_instance_of(Output).to receive(:display_guess_result).with(true)
 
@@ -153,6 +138,10 @@ describe Hangman do
 
     context 'when guess is entered' do
       it 'should display the remaining lives' do
+        # input_moc = instance_double(Input)
+        # allow(Input).to receive(:new).and_return(input_moc)
+        # allow(input_moc).to receive(:get_guess).and_return('k')
+
         allow_any_instance_of(Input).to receive(:get_guess).and_return('k')
         expect_any_instance_of(Output).to receive(:display_remaining_lives).with(9, ['k'])
 

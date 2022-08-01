@@ -1,11 +1,10 @@
 require_relative "./hangman"
-require_relative "./player_wants_to_stop_playing"
+
+input = Input.new($stdin, $stdout)
 
 loop do
   hangman = Hangman.new
   hangman.play
 
-  if player_wants_to_stop_playing
-    break
-  end
+  break unless input.ask_replay_game
 end

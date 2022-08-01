@@ -2,27 +2,25 @@ require_relative '../input'
 
 describe Input do
   let(:output) { StringIO.new }
-  describe '#get_answer' do
+  describe '#ask_replay_game' do
     it 'should show the error message if typed other than "y" or "n"' do
-      Input.new(build_input('e4', 'gahgefawgaw3/#*🤡tr', 'n'.chars), output).get_answer
+      Input.new(build_input('e4', 'gahgefawgaw3/#*🤡tr', 'n'.chars), output).ask_replay_game
+      expect(output.string).to include '==> Do you want to play it again? <y/n>'
       expect(output.string).to include "Either 'y' or 'n' is allowed."
     end
 
-    it 'should exit the game if typed "n"' do
-      Input.new(build_input('n'.chars), output).get_answer
+    it 'should be falsy if typed "n"' do
+      result = Input.new(build_input('n'.chars), output).ask_replay_game
+      expect(result).to be_falsy
+      expect(output.string).to include '==> Do you want to play it again? <y/n>'
       expect(output.string).to include "Bye"
     end
 
-    it 'should restart the game if typed "y"' do
-      Input.new(build_input('y'.chars), output).get_answer
+    it 'should be truthy if typed "y"' do
+      result = Input.new(build_input('y'.chars), output).ask_replay_game
+      expect(result).to be_truthy
+      expect(output.string).to include '==> Do you want to play it again? <y/n>'
       expect(output.string).to include "Play again"
-    end
-
-    context 'when typed "y"' do
-      it 'should restart the game' do
-        Input.new(build_input('y'.chars), output).get_answer
-        expect(output.string).to include "Play again"
-      end
     end
 
     def build_input(*letters)
