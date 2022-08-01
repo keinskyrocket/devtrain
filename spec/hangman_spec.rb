@@ -1,58 +1,62 @@
 require_relative '../hangman'
 
 describe Hangman do
+  let(:input) { StringIO.new }
+  let(:output) { StringIO.new }
   describe '#play' do
     it 'should end the game if all lives are consumed' do
-      output = StringIO.new
-      hangman = Hangman.new(build_input('qweryuiop'.chars), output, 'hat')
-
-      game_property = {
-        hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
-        game_won: false,
-        wrong_letters_answered: ['q', 'w', 'e', 'r', 'y', 'u', 'i', 'o', 'p']
-      }
-
-      hangman.play
-      expect(game_property[:game_won]).to be false
-      expect(game_property[:wrong_letters_answered].length).to eq 9
+      allow_any_instance_of(Input).to receive(:get_guess).and_return('q', 'w', 'e', 'r', 'y', 'u', 'i', 'o', 'p')
+      expect_any_instance_of(Output).to receive(:end).with('hat', false)
+      
+      Hangman.new(input, output, 'hat').play
     end
 
     it 'should end the game if the secret word is revealed' do
-      output = StringIO.new
-      hangman = Hangman.new(build_input('hat'.chars), output, 'hat')
-
-      game_property = {
-        hash_of_word: [ { letter: 'h', validation: true }, { letter: 'a', validation: true }, { letter: 't', validation: true } ],
-        game_won: true,
-        wrong_letters_answered: []
-      }
-
-      hangman.play
-      expect(game_property[:game_won]).to be true
-      expect(game_property[:wrong_letters_answered].length).not_to eq 9
+      allow_any_instance_of(Input).to receive(:get_guess).and_return('h', 'a', 't')
+      expect_any_instance_of(Output).to receive(:end).with('hat', true)
+      
+      Hangman.new(input, output, 'hat').play
     end
 
-    it 'should ask users to type a guess unless all lives are consumed or the secret word is revealed' do
-      output = StringIO.new
-      hangman = Hangman.new(build_input('plshat'.chars), output, 'hat')
+    # it 'should ask users to type a guess unless all lives are consumed or the secret word is revealed' do
+    #   
+    #   hangman = Hangman.new(build_input('plshat'.chars), output, 'hat')
+
+    #   game_property = {
+    #     hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
+    #     game_won: false,
+    #     wrong_letters_answered: ['p', 'l', 's']
+    #   }
+
+    #   # hangman.play
+    #   expect(game_property[:game_won]).to be false
+    #   expect(game_property[:wrong_letters_answered].length).not_to eq 9
+    # end
+  end
+
+  describe '#take_turn' do
+    it 'should display the current progress of the game' do
+      allow_any_instance_of(Input).to receive(:get_guess).and_return('h', 'a', 't')
+      expect_any_instance_of(Output).to receive(:display_progress).with([nil, nil, nil], [])
+
+      hangman = Hangman.new(input, output, 'hat')
 
       game_property = {
         hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
         game_won: false,
-        wrong_letters_answered: ['p', 'l', 's']
+        wrong_letters_answered: []
       }
 
-      hangman.play
-      expect(game_property[:game_won]).to be false
-      expect(game_property[:wrong_letters_answered].length).not_to eq 9
+      new_game_property = hangman.take_turn(game_property)
+      expect(new_game_property[:wrong_letters_answered]).to eq []
     end
-  end
-
-  describe '#take_turn' do
+    
     context 'when guess is repeated' do
       it 'warns user and does not remove life' do
-        output = StringIO.new
-        hangman = Hangman.new(build_input('q'), output, 'hat')
+        allow_any_instance_of(Input).to receive(:get_guess).and_return('q')  ## rspec magic -> stubbing fake input
+        expect_any_instance_of(Output).to receive(:has_duplicates).with('q') 
+
+        hangman = Hangman.new(input, output, 'hat')
 
         game_property = {
           hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
@@ -69,11 +73,12 @@ describe Hangman do
     context 'when guess is a new letter' do
       context 'when guess is a correct letter' do
         it 'should reveal the letter from the secret word' do
-          output = StringIO.new
-          hangman = Hangman.new(build_input('h'), output, 'hat')
+          allow_any_instance_of(Input).to receive(:get_guess).and_return('h')
+
+          hangman = Hangman.new(input, output, 'hat')
 
           game_property = {
-            hash_of_word: [ { letter: 'h', validation: true }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
+            hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
             game_won: false,
             wrong_letters_answered: []
           }
@@ -82,28 +87,86 @@ describe Hangman do
           expect(new_game_property[:hash_of_word][0][:validation]).to be true
           expect(new_game_property[:wrong_letters_answered].length).to eq 0
         end
-      end
 
-      context 'when guess is an incorrect letter' do 
-        it 'should record the letter and lose a life' do
-          output = StringIO.new
-          hangman = Hangman.new(build_input('kgm'.chars), output, 'hat')
+        it 'should return "true" to display a message' do
+          allow_any_instance_of(Input).to receive(:get_guess).and_return('h')
+          expect_any_instance_of(Output).to receive(:display_guess_result).with(true)
 
           game_property = {
             hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
             game_won: false,
-            wrong_letters_answered: ['k', 'g', 'm']
+            wrong_letters_answered: []
+          }
+          
+          Hangman.new(input, output, 'hat').take_turn(game_property)
+        end
+
+        context 'when the guess completes the word' do
+          it 'should win the game' do
+            allow_any_instance_of(Input).to receive(:get_guess).and_return('t')
+
+            hangman = Hangman.new(input, output, 'hat')
+  
+            game_property = {
+              hash_of_word: [ { letter: 'h', validation: true }, { letter: 'a', validation: true }, { letter: 't', validation: false } ],
+              game_won: false,
+              wrong_letters_answered: []
+            }
+  
+            new_game_property = hangman.take_turn(game_property)
+            expect(new_game_property[:game_won]).to be true
+          end
+        end
+      end
+
+      context 'when guess is an incorrect letter' do 
+        it 'should record the letter and lose a life' do
+          allow_any_instance_of(Input).to receive(:get_guess).and_return('k')
+
+          hangman = Hangman.new(input, output, 'hat')
+
+          game_property = {
+            hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
+            game_won: false,
+            wrong_letters_answered: []
           }
 
           new_game_property = hangman.take_turn(game_property)
           expect(new_game_property[:hash_of_word][0][:validation]).to be false
-          expect(new_game_property[:wrong_letters_answered].length).to eq 3
+          expect(new_game_property[:wrong_letters_answered].length).to eq 1
+        end
+
+        it 'should return "false" to display a message' do
+          allow_any_instance_of(Input).to receive(:get_guess).and_return('k')
+          expect_any_instance_of(Output).to receive(:display_guess_result).with(false)
+          
+          game_property = {
+            hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
+            game_won: false,
+            wrong_letters_answered: []
+          }
+          
+          Hangman.new(input, output, 'hat').take_turn(game_property)
         end
       end
     end
-  end
 
-  def build_input(*letters)
-    StringIO.new(letters.join("\n") + "\n")
+    context 'when guess is entered' do
+      it 'should display the remaining lives' do
+        allow_any_instance_of(Input).to receive(:get_guess).and_return('k')
+        expect_any_instance_of(Output).to receive(:display_remaining_lives).with(9, ['k'])
+
+        hangman = Hangman.new(input, output, 'hat')
+
+        game_property = {
+          hash_of_word: [ { letter: 'h', validation: false }, { letter: 'a', validation: false }, { letter: 't', validation: false } ],
+          game_won: false,
+          wrong_letters_answered: []
+        }
+
+        new_game_property = hangman.take_turn(game_property)
+        expect(new_game_property[:wrong_letters_answered]).to eq ['k']
+      end
+    end
   end
 end
