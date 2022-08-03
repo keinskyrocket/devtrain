@@ -1,6 +1,7 @@
 require 'pry-byebug'
 require_relative './input'
 require_relative './output'
+require_relative './stats'
 
 class Hangman
   MAX_LIVES = 9
@@ -10,6 +11,7 @@ class Hangman
     @output = Output.new(console_output)
     @input = Input.new(console_input, console_output)
     @word = word || WORDS.sample ## word ? word : WORDS.sample
+    @stats = Stats.new
   end
 
   def play
@@ -19,6 +21,7 @@ class Hangman
       wrong_letters_answered: []
     }
 
+    @stats.check_game_log
     @output.start
 
     while game_property[:wrong_letters_answered].length < MAX_LIVES && !game_property[:game_won] do

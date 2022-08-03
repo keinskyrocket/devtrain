@@ -1,3 +1,15 @@
+class Stats
+  def check_game_log
+    if !File.file?('log.json')
+      File.new('log.json', 'w')
+      puts "Log file created"
+    else
+      puts "Skip"
+    end
+  end
+end
+
+
 # Launch the game
 
 ##### Check if there is a history file
@@ -31,21 +43,21 @@
 
 # Ask player if they want to keep playing
 
-{
-  "history": [
-    {
-      "timestamp": "yyyy-mm-dd",
-      "result" : "win",
-      "numberOfGuessTotal": "xxx",
-      "numberOfGuessFail": "xxx",
-      "secretWord": "turtle"
-    },
-    {
-      "timestamp": "yyyy-mm-dd",
-      "result" : "lose",
-      "numberOfGuessTotal": "xxx",
-      "numberOfGuessFail": "xxx",
-      "secretWord": "hat"
-    },
-  ]
-}
+# {
+#   "history": [
+#     {
+#       "timestamp": "yyyy-mm-dd",
+#       "result" : "win",
+#       "numberOfGuessTotal": "xxx",
+#       "numberOfGuessFail": "xxx",
+#       "secretWord": "turtle"
+#     },
+#     {
+#       "timestamp": "yyyy-mm-dd",
+#       "result" : "lose",
+#       "numberOfGuessTotal": "xxx",
+#       "numberOfGuessFail": "xxx",
+#       "secretWord": "hat"
+#     },
+#   ]
+# }
