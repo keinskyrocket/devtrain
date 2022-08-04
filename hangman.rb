@@ -28,6 +28,8 @@ class Hangman
       game_property = take_turn(game_property)
     end
 
+    @stats.save_game_log(@word, game_property)
+    @stats.read_game_log
     @output.end(@word, game_property[:game_won])
   end
 
