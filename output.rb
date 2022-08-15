@@ -41,6 +41,14 @@ class Output
   def end(word, game_won)
     @console_output.puts "\n\n******************************"
     @console_output.puts game_won ? "Win. Yes, it is '#{word}'" : "Lose. The answer is '#{word}'"
+    @console_output.puts "------------------------------"
+  end
+
+  def display_stats(read_game_log)
+    @console_output.puts "Number of game played: #{read_game_log[:times_game_played]}"
+    @console_output.puts "Number of game won: #{read_game_log[:times_game_won]}"
+    @console_output.puts "Game won rate: #{read_game_log[:game_won_rate]}%"
+    @console_output.puts "Avg number of guesses used to win: #{read_game_log[:avg_times_guessed_to_win]}"
     @console_output.puts "******************************"
   end
 end

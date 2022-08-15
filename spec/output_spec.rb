@@ -45,5 +45,17 @@ describe Output do
       Output.new(output).end('turtle', false)
       expect(output.string).to include "Lose. The answer is 'turtle'"
     end
+
+    it 'should display game stats' do
+      read_game_log = {
+        times_game_played: 10,
+        times_game_won: 5,
+        game_won_rate: 50,
+        avg_times_guessed_to_win: 3
+      }
+
+      Output.new(output).display_stats(read_game_log)
+      expect(output.string).to include "Number of game played:"
+    end
   end
 end

@@ -1,38 +1,47 @@
+require_relative './output'
 require 'json'
 require 'time'
 
 class Stats
-  def check_game_log
-    if !File.file?('log.json')
-      File.new('log.json', 'w') 
+  def create_game_log
+    if !File.file?('log.txt')
+      File.new('log.txt', 'w') 
     end
   end
 
   def save_game_log(word, game_property)
     individual_log = {
       :timestamp => Time.now.utc.strftime('%Y-%m-%d %H:%M:%S'),
-      :result => game_property[:game_won],
+      :game_won => game_property[:game_won],
       :numberOfGuessFail => game_property[:wrong_letters_answered].length,
       :secretWord => word
     }
 
-    File.open('log.json', 'a') { |f| f << individual_log.to_json + "\n" }
+    File.open('log.txt', 'a') { |f| f << individual_log.to_json + "\n" }
   end
 
   def read_game_log
-    all_logs = File.open('log.json').map { |log| JSON.parse(log.strip) }
-    logs_for_wins = all_logs.select { |el| el if el["result"] == true }
+    all_logs = File.open('log.txt').map { |log| JSON.parse(log.strip) }
+    logs_for_wins = all_logs.select { |el| el["game_won"] == true }
     times_guessed_to_win = logs_for_wins.map { |el| el["numberOfGuessFail"] + el["secretWord"].split.size }
 
     times_game_played = all_logs.length
     times_game_won = logs_for_wins.length
-    game_won_rate = (times_game_won * 100) / times_game_played
-    avg_times_guessed_to_win = times_guessed_to_win.sum / times_game_won
-    
-    puts "Number of game played: #{times_game_played}"
-    puts "Number of game won: #{times_game_won}"
-    puts "Game won rate: #{game_won_rate}%"
-    puts "Avg number of guesses used to win: #{avg_times_guessed_to_win}"
+
+    if times_game_won < 1
+      game_won_rate = 0
+      avg_times_guessed_to_win = 0
+    else
+      game_won_rate = (times_game_won * 100) / times_game_played
+      avg_times_guessed_to_win = times_guessed_to_win.sum / times_game_won
+    end
+
+    { 
+      times_game_played: times_game_played,
+      times_game_won: times_game_won,
+      game_won_rate: game_won_rate,
+      avg_times_guessed_to_win: avg_times_guessed_to_win,
+    }    
   end
 end
 

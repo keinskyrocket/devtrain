@@ -21,16 +21,16 @@ class Hangman
       wrong_letters_answered: []
     }
 
-    @stats.check_game_log
+    @stats.create_game_log
     @output.start
 
     while game_property[:wrong_letters_answered].length < MAX_LIVES && !game_property[:game_won] do
       game_property = take_turn(game_property)
     end
 
-    @stats.save_game_log(@word, game_property)
-    @stats.read_game_log
     @output.end(@word, game_property[:game_won])
+    @stats.save_game_log(@word, game_property)
+    @output.display_stats(@stats.read_game_log)
   end
 
   def take_turn(game_property)
