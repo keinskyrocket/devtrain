@@ -5,24 +5,28 @@ require 'time'
 class Stats
   def create_game_log
     if !File.file?('log.txt')
-      File.new('log.txt', 'w') 
+      file_opened = File.new('log.txt', 'w')
+      file_opened.close
     end
   end
 
   def save_game_log(word, game_property)
     individual_log = {
-      :timestamp => Time.now.utc.strftime('%Y-%m-%d %H:%M:%S'),
-      :game_won => game_property[:game_won],
-      :numberOfGuessFail => game_property[:wrong_letters_answered].length,
-      :secretWord => word
+      timestamp: Time.now.utc.strftime('%Y-%m-%d %H:%M:%S'),
+      game_won: game_property[:game_won],
+      numberOfGuessFail: game_property[:wrong_letters_answered].length,
+      secretWord: word
     }
 
     File.open('log.txt', 'a') { |f| f << individual_log.to_json + "\n" }
   end
 
   def read_game_log
-    all_logs = File.open('log.txt').map { |log| JSON.parse(log.strip) }
-    logs_for_wins = all_logs.select { |el| el["game_won"] == true }
+    all_logs = File.open('log.txt') do |f|
+      f.map { |log| JSON.parse(log.strip) }
+    end
+
+    logs_for_wins = all_logs.select { |el| el["game_won"] }
     times_guessed_to_win = logs_for_wins.map { |el| el["numberOfGuessFail"] + el["secretWord"].split.size }
 
     times_game_played = all_logs.length

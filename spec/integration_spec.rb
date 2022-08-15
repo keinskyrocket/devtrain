@@ -1,6 +1,13 @@
 require_relative '../hangman'
 
 describe 'Hangman game integration test' do
+  before(:each) do
+    filename = 'log.txt'
+
+    allow(File).to receive(:new).with(filename, 'w').and_return(StringIO.new(''))
+    allow(File).to receive(:open).with(filename, any_args).and_yield(StringIO.new(''))
+  end
+
   it 'Can win a game' do
     output = StringIO.new
     Hangman.new(build_input('turtle'.chars), output, 'turtle').play
@@ -51,6 +58,16 @@ describe 'Hangman game integration test' do
     expect(output.string).to include 'Only allow single letter guesses'
     expect(output.string).not_to include '>> Remaining lives: 8' 
   end
+
+  it 'should show game stats when game ends' do
+    output = StringIO.new
+    Hangman.new(build_input('turtle'.chars), output, 'turtle').play
+    expect(output.string).to include 'Number of game played: 0'
+    expect(output.string).to include 'Number of game won: 0'
+    expect(output.string).to include 'Game won rate: 0'
+    expect(output.string).to include 'Avg number of guesses used to win: 0'
+  end
+  ## json.parse is doing something wrong?
 
   def build_input(*letters)
     StringIO.new(letters.join("\n") + "\n")

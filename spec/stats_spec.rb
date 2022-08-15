@@ -6,8 +6,11 @@ describe Stats do
   describe '#create_game_log' do
     context 'when there is no log file' do
       it 'should create a new file' do
+        file_mock = instance_double('File')
+
         allow(File).to receive(:file?).and_return(false)
-        expect(File).to receive(:new).with(filename,'w').and_return(instance_double('File'))
+        expect(File).to receive(:new).with(filename,'w').and_return(file_mock)
+        expect(file_mock).to receive(:close)
         Stats.new.create_game_log
       end
     end
@@ -45,13 +48,27 @@ describe Stats do
   describe '#read_game_log' do
     context 'when player has never won' do
       it 'should still return the stats' do
-        log_content = <<-FILE
+        log_content = <<~FILE
           {"timestamp":"2022-08-11 04:03:12","game_won":false,"numberOfGuessFail":9,"secretWord":"moral"}
           {"timestamp":"2022-08-11 04:04:59","game_won":false,"numberOfGuessFail":9,"secretWord":"fiji"}
         FILE
         
         allow(File).to receive(:file?).and_return(true)
-        expect(File).to receive(:open).with(filename).and_return(StringIO.new(log_content))
+        expect(File).to receive(:open).with(filename).and_yield(StringIO.new(log_content))
+
+        new_stats = Stats.new.read_game_log
+
+        expect(new_stats[:times_game_won]).to eq 0
+        expect(new_stats[:game_won_rate]).to eq 0
+      end
+    end
+
+    context 'when player has never played' do
+      it 'should still return the stats' do
+        log_content = ''
+  
+        allow(File).to receive(:file?).and_return(true)
+        expect(File).to receive(:open).with(filename).and_yield(StringIO.new(log_content))
 
         new_stats = Stats.new.read_game_log
 
@@ -62,19 +79,19 @@ describe Stats do
 
     context 'when player has already won more than once' do
       it 'should return the stats' do
-        log_content = <<-FILE
+        log_content = <<~FILE
           {"timestamp":"2022-08-11 04:03:12","game_won":false,"numberOfGuessFail":9,"secretWord":"moral"}
           {"timestamp":"2022-08-11 04:04:59","game_won":false,"numberOfGuessFail":9,"secretWord":"fiji"}
           {"timestamp":"2022-08-11 22:44:41","game_won":true,"numberOfGuessFail":2,"secretWord":"situated"}
         FILE
 
         allow(File).to receive(:file?).and_return(true)
-        expect(File).to receive(:open).with(filename).and_return(StringIO.new(log_content))
+        expect(File).to receive(:open).with(filename).and_yield(StringIO.new(log_content))
 
         new_stats = Stats.new.read_game_log
 
-        expect(new_stats[:times_game_won]).not_to eq 0
-        expect(new_stats[:game_won_rate]).not_to eq 0
+        expect(new_stats[:times_game_won]).to be 1
+        expect(new_stats[:game_won_rate]).to be 33
       end
     end
   end

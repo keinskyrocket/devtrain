@@ -3,6 +3,20 @@ require_relative '../hangman'
 describe Hangman do
   let(:input) { StringIO.new }
   let(:output) { StringIO.new }
+
+  before(:each) do
+    stats_results = {
+      times_game_played: 10,
+      times_game_won: 5,
+      game_won_rate: 50,
+      avg_times_guessed_to_win: 6,
+    }
+
+    allow_any_instance_of(Stats).to receive(:create_game_log)
+    allow_any_instance_of(Stats).to receive(:save_game_log)
+    allow_any_instance_of(Stats).to receive(:read_game_log).and_return(stats_results)
+  end
+
   describe '#play' do
     it 'should end the game if all lives are consumed' do
       allow_any_instance_of(Input).to receive(:get_guess).and_return('q', 'w', 'e', 'r', 'y', 'u', 'i', 'o', 'p')
